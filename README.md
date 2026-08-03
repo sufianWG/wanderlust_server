@@ -1,0 +1,1 @@
+- This is server of the Wanderlust traveling site
