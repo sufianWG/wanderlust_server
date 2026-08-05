@@ -3,7 +3,7 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const express = require('express');
 const dotenv = require("dotenv");
-const {MongoClient} = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 const app = express();
 dotenv.config();
@@ -16,20 +16,53 @@ const port = process.env.PORT || 5260;
 
 const client = new MongoClient(process.env.MONGODB_URI);
 
- async function connectToMongoDB() {
+async function connectToMongoDB() {
   try {
     await client.connect();
 
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
 
-    app.post("/destination", async(req, res) => {
-        const destination = req.body
-        console.log(destination);
+    app.post("/destination", async (req, res) => {
+      const destination = req.body
+      console.log(destination);
 
-        const result = await destinationCollection.insertOne(destination);
-        res.send(result);
-        console.log("This is destination endpoint");
+      const result = await destinationCollection.insertOne(destination);
+      res.send(result);
+      console.log("This is destination endpoint");
+    })
+    app.patch("/destination/:id", async(req, res) => {
+      const {id} = req.params
+      const updatedDestination = req.body
+
+      const query = {
+        _id : new ObjectId(id)
+      }
+
+      const result = await destinationCollection.updateOne(
+        query,
+        {$set: updatedDestination}
+      )
+
+      res.send(result)
+
+
+    })
+
+    app.get("/api/destinations", async (req, res) => {
+      const allDestinationData = await destinationCollection.find().toArray();
+      console.log(allDestinationData);
+      res.send(allDestinationData);
+    })
+
+    app.get("/api/destinations/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await destinationCollection.findOne(query);
+      console.log(result);
+      res.send(result);
     })
 
     console.log("You successfully connected to MongoDB!");
@@ -42,10 +75,10 @@ const client = new MongoClient(process.env.MONGODB_URI);
 connectToMongoDB()
 
 app.get('/', (req, res) => {
-    console.log("Server runnig fine");
-    res.send("Server running Fine at homepage");
+  console.log("Server runnig fine");
+  res.send("Server running Fine at homepage");
 })
 
-app.listen(port, ()=>{
-    console.log(`server running at http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`server running at http://localhost:${port}`);
 })
