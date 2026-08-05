@@ -49,6 +49,15 @@ async function connectToMongoDB() {
 
     })
 
+    app.delete("/destination/:id", async(req, res) => {
+      const {id} = req.params
+      const query = {
+        _id : new ObjectId(id)
+      }
+      const result = await destinationCollection.deleteOne(query)
+      res.send(result)
+    })
+
     app.get("/api/destinations", async (req, res) => {
       const allDestinationData = await destinationCollection.find().toArray();
       console.log(allDestinationData);
