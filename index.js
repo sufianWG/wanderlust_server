@@ -22,6 +22,7 @@ async function connectToMongoDB() {
 
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
+    const bookingCollection = db.collection("bookings");
 
     app.post("/destination", async (req, res) => {
       const destination = req.body
@@ -31,28 +32,39 @@ async function connectToMongoDB() {
       res.send(result);
       console.log("This is destination endpoint");
     })
-    app.patch("/destination/:id", async(req, res) => {
-      const {id} = req.params
+
+    app.get("/booking/:userId", async (req, res) => {
+      const {userId} = req.params
+
+      const result = await bookingCollection.find({userId: userId}).toArray()
+      res.send(result)
+    })
+    app.post("/booking", async (req, res) => {
+      const booking = req.body
+      console.log(booking);
+      const result = await bookingCollection.insertOne(booking);
+      res.send(result);
+      // console.log("This is destination endpoint");
+    })
+    app.patch("/destination/:id", async (req, res) => {
+      const { id } = req.params
       const updatedDestination = req.body
 
       const query = {
-        _id : new ObjectId(id)
+        _id: new ObjectId(id)
       }
 
       const result = await destinationCollection.updateOne(
         query,
-        {$set: updatedDestination}
+        { $set: updatedDestination }
       )
-
       res.send(result)
-
-
     })
 
-    app.delete("/destination/:id", async(req, res) => {
-      const {id} = req.params
+    app.delete("/destination/:id", async (req, res) => {
+      const { id } = req.params
       const query = {
-        _id : new ObjectId(id)
+        _id: new ObjectId(id)
       }
       const result = await destinationCollection.deleteOne(query)
       res.send(result)
