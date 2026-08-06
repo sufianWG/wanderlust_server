@@ -35,8 +35,16 @@ async function connectToMongoDB() {
 
     app.get("/booking/:userId", async (req, res) => {
       const {userId} = req.params
-
+ 
       const result = await bookingCollection.find({userId: userId}).toArray()
+      res.send(result)
+    })
+    app.delete("/booking/:bookingId", async (req, res) => {
+      const {bookingId} = req.params
+      const query = {
+        _id: new ObjectId(bookingId)
+      }
+      const result = await bookingCollection.deleteOne(query)
       res.send(result)
     })
     app.post("/booking", async (req, res) => {
