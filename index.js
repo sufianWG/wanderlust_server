@@ -5,6 +5,7 @@ const express = require('express');
 const dotenv = require("dotenv");
 const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const app = express();
 dotenv.config();
 
@@ -16,6 +17,38 @@ const port = process.env.PORT || 5260;
 
 const client = new MongoClient(process.env.MONGODB_URI);
 
+const JWKS = createRemoteJWKSet(
+  new URL('http://localhost:3000/api/auth/jwks')
+)
+
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).send({
+      message: "Unauthorized access"
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).send({
+      message: "Unauthorized access"
+    });
+  }
+  console.log(token);
+  try {
+    const { payload } = await jwtVerify(token, JWKS);
+    console.log(payload);
+    next()
+  } catch (error) {
+    return res.status(403).json({
+      message: "Forbidedn"
+    });
+  }
+
+
+}
 async function connectToMongoDB() {
   try {
     await client.connect();
@@ -23,6 +56,7 @@ async function connectToMongoDB() {
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
     const bookingCollection = db.collection("bookings");
+
 
     app.post("/destination", async (req, res) => {
       const destination = req.body
@@ -34,13 +68,13 @@ async function connectToMongoDB() {
     })
 
     app.get("/booking/:userId", async (req, res) => {
-      const {userId} = req.params
- 
-      const result = await bookingCollection.find({userId: userId}).toArray()
+      const { userId } = req.params
+
+      const result = await bookingCollection.find({ userId: userId }).toArray()
       res.send(result)
     })
     app.delete("/booking/:bookingId", async (req, res) => {
-      const {bookingId} = req.params
+      const { bookingId } = req.params
       const query = {
         _id: new ObjectId(bookingId)
       }
@@ -84,7 +118,7 @@ async function connectToMongoDB() {
       res.send(allDestinationData);
     })
 
-    app.get("/api/destinations/:id", async (req, res) => {
+    app.get("/api/destinations/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const query = {
         _id: new ObjectId(id)
