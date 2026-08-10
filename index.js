@@ -18,7 +18,7 @@ const port = process.env.PORT || 5260;
 const client = new MongoClient(process.env.MONGODB_URI);
 
 const JWKS = createRemoteJWKSet(
-  new URL('http://localhost:3000/api/auth/jwks')
+  new URL(`${process.env.FRONTEND_URL}/api/auth/jwks`)
 )
 
 const verifyToken = async (req, res, next) => {
@@ -46,7 +46,6 @@ const verifyToken = async (req, res, next) => {
       message: "Forbidedn"
     });
   }
-
 
 }
 async function connectToMongoDB() {
