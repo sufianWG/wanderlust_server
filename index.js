@@ -50,6 +50,7 @@ const verifyToken = async (req, res, next) => {
 }
 async function connectToMongoDB() {
   try {
+    // have to comment out
     // await client.connect();
 
     const db = client.db("wanderlust");
@@ -117,6 +118,10 @@ async function connectToMongoDB() {
       res.send(allDestinationData);
     })
 
+    app.get("/api/featured", async(req, res) => {
+      const featuredDestinations = await destinationCollection.find().limit(3).toArray()
+      res.send(featuredDestinations)
+    })
     app.get("/api/destinations/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const query = {
@@ -140,9 +145,10 @@ app.get('/', (req, res) => {
   console.log("Server runnig fine");
   res.send("Server running Fine at homepage");
 })
-
+//  have to remove comment out
 module.exports = app;
 
+// have to comment out
 // app.listen(port, () => {
 //   console.log(`server running at http://localhost:${port}`);
 // })
