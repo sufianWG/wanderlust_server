@@ -58,7 +58,7 @@ async function connectToMongoDB() {
     const bookingCollection = db.collection("bookings");
 
 
-    app.post("/destination", async (req, res) => {
+    app.post("/destination", verifyToken, async (req, res) => {
       const destination = req.body
       console.log(destination);
 
@@ -67,13 +67,13 @@ async function connectToMongoDB() {
       console.log("This is destination endpoint");
     })
 
-    app.get("/booking/:userId", async (req, res) => {
+    app.get("/booking/:userId", verifyToken, async (req, res) => {
       const { userId } = req.params
 
       const result = await bookingCollection.find({ userId: userId }).toArray()
       res.send(result)
     })
-    app.delete("/booking/:bookingId", async (req, res) => {
+    app.delete("/booking/:bookingId", verifyToken, async (req, res) => {
       const { bookingId } = req.params
       const query = {
         _id: new ObjectId(bookingId)
@@ -81,14 +81,14 @@ async function connectToMongoDB() {
       const result = await bookingCollection.deleteOne(query)
       res.send(result)
     })
-    app.post("/booking", async (req, res) => {
+    app.post("/booking", verifyToken, async (req, res) => {
       const booking = req.body
       console.log(booking);
       const result = await bookingCollection.insertOne(booking);
       res.send(result);
       // console.log("This is destination endpoint");
     })
-    app.patch("/destination/:id", async (req, res) => {
+    app.patch("/destination/:id", verifyToken, async (req, res) => {
       const { id } = req.params
       const updatedDestination = req.body
 
@@ -103,7 +103,7 @@ async function connectToMongoDB() {
       res.send(result)
     })
 
-    app.delete("/destination/:id", async (req, res) => {
+    app.delete("/destination/:id", verifyToken, async (req, res) => {
       const { id } = req.params
       const query = {
         _id: new ObjectId(id)
@@ -112,7 +112,7 @@ async function connectToMongoDB() {
       res.send(result)
     })
 
-    app.get("/api/destinations", async (req, res) => {
+    app.get("/api/destinations", verifyToken, async (req, res) => {
       const allDestinationData = await destinationCollection.find().toArray();
       console.log(allDestinationData);
       res.send(allDestinationData);
