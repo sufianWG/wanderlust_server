@@ -50,7 +50,7 @@ const verifyToken = async (req, res, next) => {
 }
 async function connectToMongoDB() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
