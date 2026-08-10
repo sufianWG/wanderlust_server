@@ -141,6 +141,8 @@ app.get('/', (req, res) => {
   res.send("Server running Fine at homepage");
 })
 
-app.listen(port, () => {
-  console.log(`server running at http://localhost:${port}`);
-})
+module.exports = app;
+
+// app.listen(port, () => {
+//   console.log(`server running at http://localhost:${port}`);
+// })
